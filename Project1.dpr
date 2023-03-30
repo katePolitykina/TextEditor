@@ -1,4 +1,4 @@
-program TextSplitter;
+program project1;
 
 {$APPTYPE CONSOLE}
 
@@ -15,11 +15,17 @@ var
   Paragraphs: TList<string>;
   Paragraph: string;
   Word: string;
+  Sentence: string;
   i: Integer;
+  Sentences: TArray<string>;
 begin
   // Split the text into words
   Words := Text.Split([' ']);
-
+  Sentences := Text.Split(['. ']);
+    for Sentence in Sentences do
+    begin
+      writeln( Sentence);
+    end;
 
   // Count the frequency of occurrence of each word
   WordCount := TDictionary<string, Integer>.Create;
