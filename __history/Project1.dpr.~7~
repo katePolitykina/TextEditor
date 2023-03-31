@@ -34,12 +34,11 @@ procedure NoPunctuation(var text:string);
   end;
 function SplitTextIntoParagraphs(const Text: string): TArray<string>;
 var
- // Words: TArray<string>;
   Words: TArray<string>;
   TextNoPunctuation: String;
   WordCount: TDictionary<string, Integer>;
   Paragraphs: TList<string>;
-  Paragraph: Ansistring;
+  Paragraph: string;
   Word: string;
   Sentence: string;
   i: Integer;
@@ -50,8 +49,8 @@ begin
   TextNoPunctuation:=text;     // Create copy of text with no punctuation
   NoPunctuation(TextNoPunctuation);
   // Split the text into words
-   Words := TextNoPunctuation.Split([' ']);
-   Sentences := Text.Split(['. ']);
+  Words := TextNoPunctuation.Split([' ']);
+  Sentences := Text.Split(['. ']);
     for Sentence in Sentences do
     begin
       writeln( Sentence);
@@ -78,13 +77,13 @@ begin
       begin
         if (WordCount[Words[i]] <3) and (Paragraph <> '') then // Split the paragraph if the word occurs less than 3 times
         begin
-          Paragraphs.Add(Paragraph);
+          Paragraphs.Add(Paragraph.Trim);
           Paragraph := '';
         end;
         Paragraph := Paragraph + Words[i] + ' ';
       end;
       if Paragraph <> '' then
-        Paragraphs.Add(Paragraph);
+        Paragraphs.Add(Paragraph.Trim);
 
       // Convert the paragraphs list to an array
       Result := Paragraphs.ToArray;
@@ -98,7 +97,6 @@ end;
 procedure ShowListContents(myList:TList<string>);
 var
   i : Integer;
-
 begin
   // И повторный показ списка
   for i := 0 to myList.Count-1 do
@@ -117,7 +115,6 @@ SplittedText:=SplitTextIntoParagraphs(FirstSampleText);
 for i:= low(SplittedText) to high(SplittedText) do
   begin
     writeln(SplittedText[i]);
-
   end;
 readln;
 end.

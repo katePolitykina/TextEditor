@@ -35,7 +35,7 @@ procedure NoPunctuation(var text:string);
 function SplitTextIntoParagraphs(const Text: string): TArray<string>;
 var
  // Words: TArray<string>;
-  Words: TArray<string>;
+  Words: Array of string;
   TextNoPunctuation: String;
   WordCount: TDictionary<string, Integer>;
   Paragraphs: TList<string>;
@@ -50,8 +50,8 @@ begin
   TextNoPunctuation:=text;     // Create copy of text with no punctuation
   NoPunctuation(TextNoPunctuation);
   // Split the text into words
-   Words := TextNoPunctuation.Split([' ']);
-   Sentences := Text.Split(['. ']);
+ Words := TextNoPunctuation.Split([' ']);
+  Sentences := Text.Split(['. ']);
     for Sentence in Sentences do
     begin
       writeln( Sentence);
