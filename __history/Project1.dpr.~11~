@@ -109,6 +109,7 @@ procedure WordsSplit(text:ansistring; var Words:TArray<string>);
 var
  // Words: TArray<string>;
   Words: TArray<string>;
+  TextNoPunctuation: String;
   WordCount: TDictionary<string, Integer>;
   Paragraphs: TList<string>;
   Paragraph: Ansistring;
@@ -119,10 +120,12 @@ var
 
 
 begin
+  TextNoPunctuation:= text;
   SentenceSplit(text, Sentences);   // Create copy of text with no punctuation
   NoPunctuation(Text);
   // Split the text into words
   WordsSplit(text, words);
+   SentenceSplit(text, Sentences);
     for Sentence in Sentences do
     begin
       writeln( Sentence);

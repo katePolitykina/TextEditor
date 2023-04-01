@@ -10,7 +10,7 @@ uses
 Type
   TMyArray = array of String;
 
-Procedure DeletePunctuation( const punct:char; var text:ansistring);
+Procedure DeletePunctuation( const punct:char; var text:string);
   var i: integer;
   begin
     i:= pos( punct, text);
@@ -20,7 +20,7 @@ Procedure DeletePunctuation( const punct:char; var text:ansistring);
         i:= pos( punct, text);
       end;
   end;
-procedure NoPunctuation(var text:ansistring);
+procedure NoPunctuation(var text:string);
 
   begin
     DeletePunctuation('.', Text);
@@ -81,34 +81,11 @@ procedure SentenceSplit( text:ansistring; var Sentence:TmyArray);
 
       end;
   end;
-procedure WordsSplit(text:ansistring; var Words:TArray<string>);
-  var i,j:integer;
-  begin
-    i:=1;
-    j:=0;
-    setLength(words, 1);
-    while text<>'' do
-      begin
-        while text[1]=' ' do
-          delete( text,1,1);
-        Case text[i] of
-          ' ': begin
-                 Words[j]:=copy(text,1,i-1);
-                 delete(text,1,i);
-                 inc(j);
-                 setLength(words, j+1);
-                 i:=1;
-               end;
-        else
-          inc(i);
-        End;
-
-      end;
-  end;
-  function SplitTextIntoParagraphs( Text: Ansistring): TArray<string>;
+function SplitTextIntoParagraphs(const Text: Ansistring): TArray<string>;
 var
  // Words: TArray<string>;
   Words: TArray<string>;
+  TextNoPunctuation: String;
   WordCount: TDictionary<string, Integer>;
   Paragraphs: TList<string>;
   Paragraph: Ansistring;
@@ -119,10 +96,11 @@ var
 
 
 begin
-  SentenceSplit(text, Sentences);   // Create copy of text with no punctuation
-  NoPunctuation(Text);
+  TextNoPunctuation:=text;     // Create copy of text with no punctuation
+  NoPunctuation(TextNoPunctuation);
   // Split the text into words
-  WordsSplit(text, words);
+   Words := TextNoPunctuation.Split([' ']);
+   SentenceSplit(text, Sentences);
     for Sentence in Sentences do
     begin
       writeln( Sentence);
