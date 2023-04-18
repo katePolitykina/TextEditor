@@ -1,4 +1,4 @@
-program project1;
+п»їprogram project1;
 // text chouldn't consist of any punctuation signs exept !()-:;"?'.,
 {$APPTYPE CONSOLE}
 
@@ -8,9 +8,119 @@ uses
   System.Generics.Collections,
   System.SysUtils;
 Type
-  TMyArray = array of String;
+  TMyArray = array of string;
+  TNounsDic = record
+    IP:string;
+    RP:string;
+    DP:string;
+    VP:string;
+    TP:string;
+    PP:string;
+  end;
+  TNounsDicArray= array of TNounsDic;
+procedure binsearch(mas:TNounsDicArray; var word:string; found:boolean);        // РёСЃРїСЂР°РІРёС‚СЊ РІС‹РІРѕРґ
+var right, left, temp, mid:integer;
+  begin
 
-Procedure DeletePunctuation( const punct:char; var text:ansistring);
+    left:=low(mas);
+    right:=high(mas)-1;
+    found:=false;
+    repeat
+      mid:=right-Round((right-left)/2);
+      if word[1]=mas[mid].IP[1] then
+        begin
+          found:=true;
+        end
+      else
+        begin
+          if word[1]>mas[mid].IP[1] then
+            left:=mid+1
+          else
+            right:=mid-1;
+        end;
+    until found or (left>right);
+    if found then
+      begin
+        found:=false;
+        temp:=mid;
+        while ((word[1]=mas[mid].IP[1]) and (mid>=Low(mas))) and not(found) do
+          begin
+            if (word=mas[mid].IP)or(word=mas[mid].RP)or(word=mas[mid].DP)or(word=mas[mid].VP)or(word=mas[mid].TP)or(word=mas[mid].PP)then
+              begin
+                found:=true;
+                word:=mas[mid].IP;
+              end
+            else
+              mid:=mid-1;
+          end;
+        if not(found) then
+          begin
+            mid:= temp+1;
+            while( word[1]=mas[mid].IP[1]) and (mid<=high(mas))and not(found) do
+              begin
+                if (word=mas[mid].IP)or(word=mas[mid].RP)or(word=mas[mid].DP)or(word=mas[mid].VP)or(word=mas[mid].TP)or(word=mas[mid].PP)then
+                  begin
+                    found:=true;
+                    word:=mas[mid].IP;
+                  end
+                else
+                  mid:=mid+1;
+              end;
+          end;
+
+      end
+  end;
+procedure ReadFromDictionaryFile(var NounsDicArray:TNounsDicArray);
+var RusNounsTxt:textfile;
+    i,j:integer;
+  begin
+    AssignFile(RusNounsTxt, '\\Mac\Home\Documents\РљСѓСЂСЃРѕРІР°СЏ СЂР°Р±РѕС‚Р°\Text Splitter\Dictionary.txt');
+    reset(RusNounsTxt);
+    i:=0;
+    j:=0;
+    setlength(NounsDicArray,1);
+    while not(Eof(RusNounsTxt)) do
+      begin
+        case i of
+          0: begin
+            readln(RusNounsTxt,NounsDicArray[j].IP);
+            NounsDicArray[j].IP := UTF8Decode(NounsDicArray[j].IP);
+            inc(i);
+          end;
+          1: begin
+            readln(RusNounsTxt,NounsDicArray[j].RP);
+            NounsDicArray[j].RP := UTF8Decode(NounsDicArray[j].RP);
+            inc(i);
+          end;
+          2: begin
+            readln(RusNounsTxt,NounsDicArray[j].DP);
+            NounsDicArray[j].DP := UTF8Decode(NounsDicArray[j].DP);
+            inc(i);
+          end;
+          3: begin
+            readln(RusNounsTxt,NounsDicArray[j].VP);
+            NounsDicArray[j].VP := UTF8Decode(NounsDicArray[j].VP);
+            inc(i);
+          end;
+          4: begin
+            readln(RusNounsTxt,NounsDicArray[j].TP);
+            NounsDicArray[j].TP := UTF8Decode(NounsDicArray[j].TP);
+            inc(i);
+          end;
+          5: begin
+            readln(RusNounsTxt,NounsDicArray[j].PP);
+            NounsDicArray[j].PP := UTF8Decode(NounsDicArray[j].PP);
+            j:=j+1;
+            setlength(NounsDicArray,j+1);
+            i:=0;
+          end;
+        end;
+      end;
+      CloseFile(RusNounsTxt);
+  end;
+
+procedure DeletePunctuation(var text:string);
+Procedure NoPunctuation( const punct:char; var text:string);
   var i: integer;
   begin
     i:= pos( punct, text);
@@ -20,20 +130,18 @@ Procedure DeletePunctuation( const punct:char; var text:ansistring);
         i:= pos( punct, text);
       end;
   end;
-procedure NoPunctuation(var text:ansistring);
-
   begin
-    DeletePunctuation('.', Text);
-    DeletePunctuation(',', Text);
-    DeletePunctuation(';', Text);
-    DeletePunctuation(':', Text);
-    DeletePunctuation('-', Text);
-    DeletePunctuation('"', Text);
-    DeletePunctuation('!', Text);
-    DeletePunctuation('?', Text);
-    DeletePunctuation('(', Text);
-    DeletePunctuation(')', Text);
-    DeletePunctuation('''', Text);
+    NoPunctuation('.', Text);
+    NoPunctuation(',', Text);
+    NoPunctuation(';', Text);
+    NoPunctuation(':', Text);
+    NoPunctuation('-', Text);
+    NoPunctuation('"', Text);
+    NoPunctuation('!', Text);
+    NoPunctuation('?', Text);
+    NoPunctuation('(', Text);
+    NoPunctuation(')', Text);
+    NoPunctuation('''', Text);
   end;
 procedure SentenceSplit( text:ansistring; var Sentence:TmyArray);
   var i,j:integer;
@@ -46,149 +154,101 @@ procedure SentenceSplit( text:ansistring; var Sentence:TmyArray);
         while text[1]=' ' do
           delete( text,1,1);
         Case text[i] of
-          '!': begin
-                 sentence[j]:=copy(text,1,i);
-                 delete(text,1,i);
-                 inc(j);
-                 setLength(Sentence, j+1);
-                 i:=1;
-               end;
-          '?': begin
-                 sentence[j]:=copy(text,1,i);
-                 delete(text,1,i);
-                 inc(j);
-                 setLength(Sentence, j+1);
-                 i:=1;
-               end;
-          '.': begin
-                 if (text[i+1]='.') and (text[i+2]='.') then
-                   begin
-                     sentence[j]:=copy(text,1,i+2);
-                     delete(text,1,i+2);
-                   end
-                 else
-                   begin
-                     sentence[j]:=copy(text,1,i);
+         '!', '?': begin
+                     sentence[j]:=copy(text,1,i)+' ';
                      delete(text,1,i);
+                     inc(j);
+                     setLength(Sentence, j+1);
+                     i:=1;
                    end;
-                 inc(j);
-                 setLength(Sentence, j+1);
-                 i:=1;
-               end;
+        '.':       begin
+                     if (text[i+1]='.') and (text[i+2]='.') then
+                       begin
+                         sentence[j]:=copy(text,1,i+2)+' ';
+                         delete(text,1,i+2);
+                       end
+                     else
+                       begin
+                         sentence[j]:=copy(text,1,i)+' ';
+                         delete(text,1,i);
+                       end;
+                     inc(j);
+                     setLength(Sentence, j+1);
+                     i:=1;
+                   end;
         else
           inc(i);
         End;
 
       end;
   end;
-procedure WordsSplit(text:ansistring; var Words:TArray<string>);
-  var i,j:integer;
-  begin
-    i:=1;
-    j:=0;
-    setLength(words, 1);
-    while text<>'' do
-      begin
-        while text[1]=' ' do
-          delete( text,1,1);
-        Case text[i] of
-          ' ': begin
-                 Words[j]:=copy(text,1,i-1);
-                 delete(text,1,i);
-                 inc(j);
-                 setLength(words, j+1);
-                 i:=1;
-               end;
-        else
-          inc(i);
-        End;
 
-      end;
-  end;
-  function SplitTextIntoParagraphs( Text: Ansistring): TArray<string>;
-var
- // Words: TArray<string>;
-  Words: TArray<string>;
-  WordCount: TDictionary<string, Integer>;
-  Paragraphs: TList<string>;
-  Paragraph: Ansistring;
-  Word: string;
-  Sentence: string;
-  i: Integer;
-  Sentences: TMyArray;
+procedure SplitTextIntoParagraphs(var SentenceOut:TmyArray);
+  var len,highc,i,j,BegOfWord,NumbOfWordsRepeated,PrevNumbOfWordsRepeated, PrevPrevNumbOfWordsRepeated :integer;
+      temp:String;
+      IsWordInDic:boolean;
+      WordCount: TDictionary<string, Integer>;
+      Sentence:TMyArray;
+      NounsDicArray:TNounsDicArray;
 
 
 begin
-  SentenceSplit(text, Sentences);   // Create copy of text with no punctuation
-  NoPunctuation(Text);
-  // Split the text into words
-  WordsSplit(text, words);
-    for Sentence in Sentences do
+ReadFromDictionaryFile(NounsDicArray);
+sentence:=copy(SentenceOut);
+WordCount := TDictionary<string, Integer>.Create;
+PrevNumbOfWordsRepeated:=0;
+PrevPrevNumbOfWordsRepeated:=0;
+  for I := Low(Sentence) to High(Sentence) do
     begin
-      writeln( Sentence);
-    end;
-
-  // Count the frequency of occurrence of each word
-  WordCount := TDictionary<string, Integer>.Create;
-  try
-    for Word in Words do
-    begin // need to add noun check
-      if WordCount.ContainsKey(Word) then
-        WordCount[Word] := WordCount[Word] + 1
-      else
-        WordCount.Add(Word, 1);
-    end;
-
-    // Initialize the paragraphs list
-    Paragraphs := TList<string>.Create;
-    try
-      // Split the text into paragraphs based on the frequency of occurrence of each word
-      Paragraph := '';
-      for i := Low(Words) to High(Words) do
-      begin
-        if (WordCount[Words[i]] >=3) and (Paragraph <> '') then // Split the paragraph if the word occurs less than 3 times
+      DeletePunctuation(sentence[i]);
+      PrevPrevNumbOfWordsRepeated:= PrevNumbOfWordsRepeated;
+      PrevNumbOfWordsRepeated:=NumbOfWordsRepeated;
+      j:=0;
+      len:=length(sentence[i]) ;
+      highc:= high(sentence[i]);
+      while highc<>0 do
         begin
-          Paragraphs.Add(Paragraph);
-          Paragraph := '';
+          BegOfWord:=j+1;
+          while sentence[i][j]<>' ' do
+            inc(j);
+          temp:=copy(sentence[i],BegOfWord,j-BegOfWord);
+          delete(sentence[i],BegOfWord,j-BegOfWord+1);
+          j:=BegOfWord-1;
+          binsearch(NounsDicArray,temp,IsWordInDic);
+          if IsWordInDic then
+            begin
+              if WordCount.ContainsKey(temp) then
+                begin
+                  NumbOfWordsRepeated:= NumbOfWordsRepeated + WordCount[temp];
+                  WordCount[temp] := WordCount[temp] + 1 ;
+                end
+              else
+                WordCount.Add(temp, 1);
+              if (PrevNumbOfWordsRepeated<PrevPrevNumbOfWordsRepeated) and((NumbOfWordsRepeated-PrevNumbOfWordsRepeated)<2) then
+                begin
+                  sentenceOut[i-2]:= sentenceOut[i-2]+ #1013;
+                  Wordcount.free;
+                  WordCount := TDictionary<string, Integer>.Create;
+                end;
+            end;
         end;
-        Paragraph := Paragraph + Words[i] + ' ';
-      end;
-      if Paragraph <> '' then
-        Paragraphs.Add(Paragraph);
 
-      // Convert the paragraphs list to an array
-      Result := Paragraphs.ToArray;
-    finally
-      Paragraphs.Free;
+
+
     end;
-  finally
-    WordCount.Free;
-  end;
-end;
-
-procedure ShowListContents(myList:TList<string>);
-var
-  i : Integer;
-
-begin
-  // И повторный показ списка
-  for i := 0 to myList.Count-1 do
-  begin
-    Writeln(myList[i]);
-  end;
 end;
 var FirstSampleText:string;
-    i : integer;
-    SplittedText:TArray<string>;
-
-
+    Sentence:TMyArray;
+    i:integer;
 begin
-FirstSampleText :='Катя пришла со школы. Катя 4 года. Катя крутая. Мама готовит суп. Мама устала.';
-SplittedText:=SplitTextIntoParagraphs(FirstSampleText);
-for i:= low(SplittedText) to high(SplittedText) do
+FirstSampleText :='РљР°С‚СЏ РїСЂРёС€Р»Р° СЃРѕ С€РєРѕР»С‹. РљР°С‚СЏ 4 РіРѕРґР°. РљР°С‚СЏ РєСЂСѓС‚Р°СЏ. РњР°РјР° РіРѕС‚РѕРІРёС‚ СЃСѓРї. РњР°РјР° СѓСЃС‚Р°Р»Р°.';
+SentenceSplit(FirstSampleText,Sentence);
+SplitTextIntoParagraphs(Sentence);
+for i:=low(Sentence) to high(Sentence) do
   begin
-    writeln(SplittedText[i]);
-
+    write(sentence[i]);
   end;
-readln;
+
+
+
 end.

@@ -1,0 +1,186 @@
+program project1;
+// text chouldn't consist of any punctuation signs exept !()-:;"?'.,
+{$APPTYPE CONSOLE}
+
+{$R *.res}
+
+uses
+  System.Generics.Collections,
+  System.SysUtils;
+Type
+  TMyArray = array of String;
+
+Procedure DeletePunctuation( const punct:char; var text:ansistring);
+  var i: integer;
+  begin
+    i:= pos( punct, text);
+    while i<>0 do
+      begin
+        delete(text, i, 1);
+        i:= pos( punct, text);
+      end;
+  end;
+procedure NoPunctuation(var text:ansistring);
+
+  begin
+    DeletePunctuation('.', Text);
+    DeletePunctuation(',', Text);
+    DeletePunctuation(';', Text);
+    DeletePunctuation(':', Text);
+    DeletePunctuation('-', Text);
+    DeletePunctuation('"', Text);
+    DeletePunctuation('!', Text);
+    DeletePunctuation('?', Text);
+    DeletePunctuation('(', Text);
+    DeletePunctuation(')', Text);
+    DeletePunctuation('''', Text);
+  end;
+procedure SentenceSplit( text:ansistring; var Sentence:TmyArray);
+  var i,j:integer;
+  begin
+    i:=1;
+    j:=0;
+    setLength(Sentence, 1);
+    while text<>'' do
+      begin
+        while text[1]=' ' do
+          delete( text,1,1);
+        Case text[i] of
+         '!', '?': begin
+                     sentence[j]:=copy(text,1,i);
+                     delete(text,1,i);
+                     inc(j);
+                     setLength(Sentence, j+1);
+                     i:=1;
+                   end;
+        '.':       begin
+                     if (text[i+1]='.') and (text[i+2]='.') then
+                       begin
+                         sentence[j]:=copy(text,1,i+2);
+                         delete(text,1,i+2);
+                       end
+                     else
+                       begin
+                         sentence[j]:=copy(text,1,i);
+                         delete(text,1,i);
+                       end;
+                     inc(j);
+                     setLength(Sentence, j+1);
+                     i:=1;
+                   end;
+        else
+          inc(i);
+        End;
+
+      end;
+  end;
+procedure WordsSplit(text:ansistring; var Words:TArray<string>);
+  var i,j:integer;
+  begin
+    i:=1;
+    j:=0;
+    setLength(words, 1);
+    while text<>'' do
+      begin
+        while text[1]=' ' do
+          delete( text,1,1);
+        Case text[i] of
+          ' ': begin
+                 Words[j]:=copy(text,1,i-1);
+                 delete(text,1,i);
+                 inc(j);
+                 setLength(words, j+1);
+                 i:=1;
+               end;
+        else
+          inc(i);
+        End;
+
+      end;
+  end;
+  function SplitTextIntoParagraphs( Text: Ansistring): TArray<string>;
+var
+ // Words: TArray<string>;
+  Words: TArray<string>;
+  WordCount: TDictionary<string, Integer>;
+  Paragraphs: TList<string>;
+  Paragraph: Ansistring;
+  Word: string;
+  Sentence: string;
+  i, NumberInSentense: Integer;
+  Sentences: TMyArray;
+  IsFound: boolean;
+
+
+begin
+  SentenceSplit(text, Sentences);   // Create copy of text with no punctuation
+  NoPunctuation(Text);
+  // Split the text into words
+  WordsSplit(text, words);
+    for Sentence in Sentences do
+    begin
+      writeln( Sentence);
+    end;
+
+  // Count the frequency of occurrence of each word
+  WordCount := TDictionary<string, Integer>.Create;
+  try
+    for Word in Words do
+    begin // need to add noun check
+      if WordCount.ContainsKey(Word) then
+        WordCount[Word] := WordCount[Word] + 1
+      else
+        WordCount.Add(Word, 1);
+    end;
+    for Word in Words do
+    begin // need to add noun check
+      if WordCount[Word]<2 then
+        WordCount.Remove(word);
+    end;
+
+    i:= low(sentences);
+    while i<=high(sentences) do
+      begin
+        IsFound:=false;
+        repeat
+
+        until IsFound;
+      end;
+
+
+      // Split the text into paragraphs based on the frequency of occurrence of each word
+      for i := Low(Words) to High(Words) do
+  finally
+    WordCount.Free;
+  end;
+end;
+
+procedure ShowListContents(myList:TList<string>);
+var
+  i : Integer;
+
+begin
+  // И повторный показ списка
+  for i := 0 to myList.Count-1 do
+  begin
+    Writeln(myList[i]);
+  end;
+end;
+var FirstSampleText:string;
+    i : integer;
+    SplittedText:TArray<string>;
+    text: string;
+
+
+begin
+FirstSampleText :='Катя пришла со школы. Катя 4 года. Катя крутая. Мама готовит суп. Мама устала.';
+SplittedText:=SplitTextIntoParagraphs(FirstSampleText);
+for i:= low(SplittedText) to high(SplittedText) do
+  begin
+    writeln(SplittedText[i]);
+
+  end;
+
+readln;
+
+end.
