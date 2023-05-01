@@ -1,0 +1,125 @@
+program project1;
+// text chouldn't consist of any punctuation signs exept !()-:;"?'.,
+{$APPTYPE CONSOLE}
+
+{$R *.res}
+
+uses
+  System.Generics.Collections,
+  System.SysUtils;
+Type
+  TMyArray = array of String;
+  PNounsDic = ^TNounsDic ;
+  TNounsDic = record
+    IP:string;
+    RP:string;
+    DP:string;
+    VP:string;
+    TP:string;
+    PP:string;
+    next:PNounsDic;
+  end;
+
+
+procedure ReadFromDictionaryFile;
+var RusNounsTxt:textfile;
+    RusNounsDic:TNounsDic;
+    Head,NewWord,Word: PNounsDic;
+    i:integer;
+
+  begin
+    AssignFile(RusNounsTxt, 'Словарь.txt');
+    reset(RusNounsTxt);
+    new(Head);
+    Word:=head;
+    i:=0;
+    while not(Eof) do
+      begin
+        case i of
+          0: begin
+            read(RusNounsTxt,Word.IP);
+            inc(i);
+          end;
+          1: begin
+            read(RusNounsTxt,Word.RP);
+            inc(i);
+          end;
+          2: begin
+            read(RusNounsTxt,Word.DP);
+            inc(i);
+          end;
+          3: begin
+            read(RusNounsTxt,Word.VP);
+            inc(i);
+          end;
+          4: begin
+            read(RusNounsTxt,Word.TP);
+            inc(i);
+          end;
+          5: begin
+            read(RusNounsTxt,Word.PP);
+            new(newWord);
+            word.next:= newWord;
+            word:=newWord;
+            i:=0;
+          end;
+        end;
+      end;
+  end;
+
+Procedure DeletePunctuation( const punct:char; var text:ansistring);
+  var i: integer;
+  begin
+    i:= pos( punct, text);
+    while i<>0 do
+      begin
+        delete(text, i, 1);
+        i:= pos( punct, text);
+      end;
+  end;
+procedure NoPunctuation(var text:ansistring);
+
+  begin
+    DeletePunctuation('.', Text);
+    DeletePunctuation(',', Text);
+    DeletePunctuation(';', Text);
+    DeletePunctuation(':', Text);
+    DeletePunctuation('-', Text);
+    DeletePunctuation('"', Text);
+    DeletePunctuation('!', Text);
+    DeletePunctuation('?', Text);
+    DeletePunctuation('(', Text);
+    DeletePunctuation(')', Text);
+    DeletePunctuation('''', Text);
+  end;
+
+
+procedure ShowListContents(myList:TList<string>);
+var
+  i : Integer;
+
+begin
+  // И повторный показ списка
+  for i := 0 to myList.Count-1 do
+  begin
+    Writeln(myList[i]);
+  end;
+end;
+var FirstSampleText:string;
+    i : integer;
+    SplittedText:TArray<string>;
+    text: string;
+
+
+begin
+FirstSampleText :='Катя пришла со школы. Катя 4 года. Катя крутая. Мама готовит суп. Мама устала.';
+SplittedText:=SplitTextIntoParagraphs(FirstSampleText);
+for i:= low(SplittedText) to high(SplittedText) do
+  begin
+    writeln(SplittedText[i]);
+
+  end;
+
+readln;
+
+end.

@@ -1,0 +1,190 @@
+program project1;
+// text chouldn't consist of any punctuation signs exept !()-:;"?'.,
+{$APPTYPE CONSOLE}
+
+{$R *.res}
+
+uses
+  System.Generics.Collections,
+  System.SysUtils;
+Type
+  TMyArray = array of Ansistring;
+  PNounsDic = ^TNounsDic ;
+  TNounsDic = record
+    IP:string;
+    RP:string;
+    DP:string;
+    VP:string;
+    TP:string;
+    PP:string;
+    next:PNounsDic;
+  end;
+
+
+procedure ReadFromDictionaryFile( Head: PNounsDic);
+var RusNounsTxt:textfile;
+    i:integer;
+    NewWord,Word: PNounsDic;
+    RusNounsDic:TNounsDic;
+  begin
+    AssignFile(RusNounsTxt, 'Словарь.txt');
+    reset(RusNounsTxt);
+    new(Head);
+    Word:=head;
+    i:=0;
+    while not(Eof) do
+      begin
+        case i of
+          0: begin
+            read(RusNounsTxt,Word.IP);
+            inc(i);
+          end;
+          1: begin
+            read(RusNounsTxt,Word.RP);
+            inc(i);
+          end;
+          2: begin
+            read(RusNounsTxt,Word.DP);
+            inc(i);
+          end;
+          3: begin
+            read(RusNounsTxt,Word.VP);
+            inc(i);
+          end;
+          4: begin
+            read(RusNounsTxt,Word.TP);
+            inc(i);
+          end;
+          5: begin
+            read(RusNounsTxt,Word.PP);
+            new(newWord);
+            word.next:= newWord;
+            word:=newWord;
+            i:=0;
+          end;
+        end;
+      end;
+  end;
+
+Procedure NoPunctuation( const punct:char; var text:ansistring);
+  var i: integer;
+  begin
+    i:= pos( punct, text);
+    while i<>0 do
+      begin
+        delete(text, i, 1);
+        i:= pos( punct, text);
+      end;
+  end;
+procedure DeletePunctuation(var text:ansistring);
+  begin
+    NoPunctuation('.', Text);
+    NoPunctuation(',', Text);
+    NoPunctuation(';', Text);
+    NoPunctuation(':', Text);
+    NoPunctuation('-', Text);
+    NoPunctuation('"', Text);
+    NoPunctuation('!', Text);
+    NoPunctuation('?', Text);
+    NoPunctuation('(', Text);
+    NoPunctuation(')', Text);
+    NoPunctuation('''', Text);
+  end;
+procedure SentenceSplit( text:ansistring; var Sentence:TmyArray);
+  var i,j:integer;
+  begin
+    i:=1;
+    j:=0;
+    setLength(Sentence, 1);
+    while text<>'' do
+      begin
+        while text[1]=' ' do
+          delete( text,1,1);
+        Case text[i] of
+         '!', '?': begin
+                     sentence[j]:=copy(text,1,i)+' ';
+                     delete(text,1,i);
+                     inc(j);
+                     setLength(Sentence, j+1);
+                     i:=1;
+                   end;
+        '.':       begin
+                     if (text[i+1]='.') and (text[i+2]='.') then
+                       begin
+                         sentence[j]:=copy(text,1,i+2)+' ';
+                         delete(text,1,i+2);
+                       end
+                     else
+                       begin
+                         sentence[j]:=copy(text,1,i)+' ';
+                         delete(text,1,i);
+                       end;
+                     inc(j);
+                     setLength(Sentence, j+1);
+                     i:=1;
+                   end;
+        ' ':       begin
+                     if text[i-1]=' ' then
+                       delete(text,i,1);
+                   end
+        else
+          inc(i);
+        End;
+
+      end;
+  end;
+
+procedure SplitTextIntoParagraphs(var Sentence:TmyArray; Head: PNounsDic );
+  var i,j,BegOfWord:integer;
+      RusNounsDic:TNounsDic;
+      temp:String;
+      IsWordInDic:boolean;
+begin
+  for I := Low(Sentence) to High(Sentence) do
+    begin
+      DeletePunctuation(sentence[i]);
+
+      j:=0;
+      while j<= length(sentence[i])do
+        begin
+          BegOfWord:=j+1;
+          while j<>' ' do
+            inc(j);
+          temp:=copy(sentence[i],BegOfWord,j-BegOfWord);
+          delete(sentence[i],BegOfWord,j-BegOfWord+1);
+          inc(j);
+          //  ищу слово по списку в словаре  в   IsWordInDic true если нашла
+          //  в plase указатель на список со словом
+          if IsWordInDic then
+            begin
+              insert(se
+            end;
+        end;
+
+    end;
+
+end;
+
+
+procedure ShowListContents(myList:TList<string>);
+var
+  i : Integer;
+
+begin
+  // И повторный показ списка
+  for i := 0 to myList.Count-1 do
+  begin
+    Writeln(myList[i]);
+  end;
+end;
+var FirstSampleText:string;
+
+
+begin
+FirstSampleText :='Катя пришла со школы. Катя 4 года. Катя крутая. Мама готовит суп. Мама устала.';
+
+
+
+readln;
+
+end.
