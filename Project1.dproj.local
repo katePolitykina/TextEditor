@@ -1,6 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <BorlandProject>
 	<Transactions>
-    <Transaction>1899.12.30 00:00:00.000.205,\\Mac\Home\Documents\Embarcadero\Studio\Projects\Project1.dproj=\\Mac\Home\Documents\Курсовая работа\Text Splitter\Project1.dproj</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.350,\\Mac\Home\Documents\Курсовая работа\Text Splitter\Project1.dproj=C:\Users\ekaterinapolitykina\Documents\textSplitterCopy\Project1.dproj</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.205,\\Mac\Home\Documents\Курсовая работа\Text Splitter\Project1.dproj=\\Mac\Home\Documents\Embarcadero\Studio\Projects\Project1.dproj</Transaction>
+    <Transaction>2023.04.30 16:46:06.020,\\Mac\Home\Documents\Курсовая работа\Text Splitter\Project1.dproj=C:\Users\ekaterinapolitykina\Documents\textSplitterCopy\Project1.dproj</Transaction>
+    <Transaction>2023.04.30 19:13:14.620,\\Mac\Home\Documents\Курсовая работа\Text Splitter New\Project1.dproj=\\Mac\Home\Documents\Курсовая работа\Text Splitter\Project1.dproj</Transaction>
   </Transactions>
 </BorlandProject>

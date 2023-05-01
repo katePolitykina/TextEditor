@@ -7,33 +7,29 @@
 uses
   System.Generics.Collections,
   System.SysUtils;
+
+Const firstDictionaryLength=10;
 Type
   TMyArray = array of string;
-  TNounsDic = record
-    IP:string;
-    RP:string;
-    DP:string;
-    VP:string;
-    TP:string;
-    PP:string;
-  end;
+  TNounsDic = array [1..12] of string;
   TNounsDicArray= array of TNounsDic;
-procedure binsearch(mas:TNounsDicArray; var word:string; found:boolean);        // исправить вывод
-var right, left, temp, mid:integer;
+procedure binsearch(mas:TNounsDicArray; var word:string; var found:boolean);        // исправить вывод
+// поиск слова в словаре и присваивание word именительного падежа
+var right, left, temp, mid, i:integer;
+    DoContinue:boolean;
   begin
-
     left:=low(mas);
-    right:=high(mas)-1;
+    right:=high(mas);
     found:=false;
     repeat
       mid:=right-Round((right-left)/2);
-      if word[1]=mas[mid].IP[1] then
+      if word[1]=mas[mid][1][1] then
         begin
           found:=true;
         end
       else
         begin
-          if word[1]>mas[mid].IP[1] then
+          if word[1]>mas[mid][1][1] then
             left:=mid+1
           else
             right:=mid-1;
@@ -43,84 +39,83 @@ var right, left, temp, mid:integer;
       begin
         found:=false;
         temp:=mid;
-        while ((word[1]=mas[mid].IP[1]) and (mid>=Low(mas))) and not(found) do
+        DoContinue:=true;
+        while DoContinue and (mid>=Low(mas))do
           begin
-            if (word=mas[mid].IP)or(word=mas[mid].RP)or(word=mas[mid].DP)or(word=mas[mid].VP)or(word=mas[mid].TP)or(word=mas[mid].PP)then
-              begin
-                found:=true;
-                word:=mas[mid].IP;
-              end
+            if word[1]<>mas[mid][1][1] then
+              DoContinue:=false
             else
-              mid:=mid-1;
+              begin
+                i:=1;
+                while (i<13) and DoContinue do
+                  begin
+                    if word=mas[mid][i] then
+                      begin
+                        found:=true;
+                        DoContinue:=false;
+                        word:=mas[mid][1];
+                      end;
+                  end;
+                  dec(mid);
+              end;
           end;
         if not(found) then
           begin
+            DoContinue:=true;
             mid:= temp+1;
-            while( word[1]=mas[mid].IP[1]) and (mid<=high(mas))and not(found) do
+            while DoContinue and (mid<=high(mas))do
               begin
-                if (word=mas[mid].IP)or(word=mas[mid].RP)or(word=mas[mid].DP)or(word=mas[mid].VP)or(word=mas[mid].TP)or(word=mas[mid].PP)then
-                  begin
-                    found:=true;
-                    word:=mas[mid].IP;
-                  end
+                if word[1]<>mas[mid][1][1] then
+                  DoContinue:=false
                 else
-                  mid:=mid+1;
+                  begin
+                    i:=1;
+                    while (i<13) and DoContinue do
+                      begin
+                        if word=mas[mid][i] then
+                          begin
+                            found:=true;
+                            DoContinue:=false;
+                            word:=mas[mid][1];
+                          end;
+                      end;
+                    inc(mid);
+                  end;
               end;
           end;
 
       end
   end;
 procedure ReadFromDictionaryFile(var NounsDicArray:TNounsDicArray);
+// запись в массив словаря
 var RusNounsTxt:textfile;
     i,j:integer;
+    DoContinue:boolean;
   begin
     AssignFile(RusNounsTxt, '\\Mac\Home\Documents\Курсовая работа\Text Splitter\Dictionary.txt');
     reset(RusNounsTxt);
-    i:=0;
-    j:=0;
-    setlength(NounsDicArray,1);
+    i:=1;
+    setlength(NounsDicArray,firstDictionaryLength);
+    j:=Low(NounsDicArray);;
+    setlength(NounsDicArray,firstDictionaryLength);
     while not(Eof(RusNounsTxt)) do
       begin
-        case i of
-          0: begin
-            readln(RusNounsTxt,NounsDicArray[j].IP);
-            NounsDicArray[j].IP := UTF8Decode(NounsDicArray[j].IP);
-            inc(i);
-          end;
-          1: begin
-            readln(RusNounsTxt,NounsDicArray[j].RP);
-            NounsDicArray[j].RP := UTF8Decode(NounsDicArray[j].RP);
-            inc(i);
-          end;
-          2: begin
-            readln(RusNounsTxt,NounsDicArray[j].DP);
-            NounsDicArray[j].DP := UTF8Decode(NounsDicArray[j].DP);
-            inc(i);
-          end;
-          3: begin
-            readln(RusNounsTxt,NounsDicArray[j].VP);
-            NounsDicArray[j].VP := UTF8Decode(NounsDicArray[j].VP);
-            inc(i);
-          end;
-          4: begin
-            readln(RusNounsTxt,NounsDicArray[j].TP);
-            NounsDicArray[j].TP := UTF8Decode(NounsDicArray[j].TP);
-            inc(i);
-          end;
-          5: begin
-            readln(RusNounsTxt,NounsDicArray[j].PP);
-            NounsDicArray[j].PP := UTF8Decode(NounsDicArray[j].PP);
-            j:=j+1;
-            setlength(NounsDicArray,j+1);
-            i:=0;
-          end;
+        if j>high(NounsDicArray)then
+          setlength(NounsDicArray,2*length(NounsDicArray));
+        for i:=1 to 12  do
+        begin
+            readln(RusNounsTxt,NounsDicArray[j][i]);
+            NounsDicArray[j][i] := UTF8Decode(NounsDicArray[j][i]);
         end;
+        inc(j);
       end;
-      CloseFile(RusNounsTxt);
+    setlength(NounsDicArray,j);
+    CloseFile(RusNounsTxt);
   end;
-
 procedure DeletePunctuation(var text:string);
+// Удаление всех знаков пунктуации
 Procedure NoPunctuation( const punct:char; var text:string);
+// Удаление определенного знака пунктуации
   var i: integer;
   begin
     i:= pos( punct, text);
@@ -144,8 +139,16 @@ Procedure NoPunctuation( const punct:char; var text:string);
     NoPunctuation('''', Text);
   end;
 procedure SentenceSplit( text:ansistring; var Sentence:TmyArray);
-  var i,j:integer;
-  begin
+// разделение текста на массив предложений
+  var i,j,textlength:integer;
+  begin       // удалить последние пробелы
+    textlength:=length(text);
+    while text[textlength]=' ' do
+      begin
+        delete( text,textlength,1);
+        textlength:=textlength-1;
+      end;
+
     i:=1;
     j:=0;
     setLength(Sentence, 1);
@@ -162,10 +165,18 @@ procedure SentenceSplit( text:ansistring; var Sentence:TmyArray);
                      i:=1;
                    end;
         '.':       begin
-                     if (text[i+1]='.') and (text[i+2]='.') then
+                     if length(text)>i then
                        begin
-                         sentence[j]:=copy(text,1,i+2)+' ';
-                         delete(text,1,i+2);
+                       if (text[i+1]='.') and (text[i+2]='.') then
+                         begin
+                           sentence[j]:=copy(text,1,i+2)+' ';
+                           delete(text,1,i+2);
+                         end
+                       else
+                         begin
+                           sentence[j]:=copy(text,1,i)+' ';
+                           delete(text,1,i);
+                         end;
                        end
                      else
                        begin
@@ -175,7 +186,7 @@ procedure SentenceSplit( text:ansistring; var Sentence:TmyArray);
                      inc(j);
                      setLength(Sentence, j+1);
                      i:=1;
-                   end;
+                    end
         else
           inc(i);
         End;
@@ -184,7 +195,9 @@ procedure SentenceSplit( text:ansistring; var Sentence:TmyArray);
   end;
 
 procedure SplitTextIntoParagraphs(var SentenceOut:TmyArray);
-  var len,highc,i,j,BegOfWord,NumbOfWordsRepeated,PrevNumbOfWordsRepeated, PrevPrevNumbOfWordsRepeated :integer;
+// разделение текста на параграфы
+  var i,j,BegOfWord,NumbOfWordsRepeated,PrevNumbOfWordsRepeated,
+      PrevPrevNumbOfWordsRepeated, IndexOfNewPassageSentence :integer;
       temp:String;
       IsWordInDic:boolean;
       WordCount: TDictionary<string, Integer>;
@@ -192,21 +205,22 @@ procedure SplitTextIntoParagraphs(var SentenceOut:TmyArray);
       NounsDicArray:TNounsDicArray;
 
 
-begin
-ReadFromDictionaryFile(NounsDicArray);
-sentence:=copy(SentenceOut);
+
+
+begin // Перезаписать буквы в малый шрифт
+ReadFromDictionaryFile(NounsDicArray);       // запись в массив словаря
+sentence:=copy(SentenceOut);      // копия предложений с пункт
 WordCount := TDictionary<string, Integer>.Create;
 PrevNumbOfWordsRepeated:=0;
 PrevPrevNumbOfWordsRepeated:=0;
+IndexOfNewPassageSentence:=0;
   for I := Low(Sentence) to High(Sentence) do
     begin
       DeletePunctuation(sentence[i]);
       PrevPrevNumbOfWordsRepeated:= PrevNumbOfWordsRepeated;
       PrevNumbOfWordsRepeated:=NumbOfWordsRepeated;
       j:=0;
-      len:=length(sentence[i]) ;
-      highc:= high(sentence[i]);
-      while highc<>0 do
+      while sentence[i]<>'' do
         begin
           BegOfWord:=j+1;
           while sentence[i][j]<>' ' do
@@ -224,31 +238,40 @@ PrevPrevNumbOfWordsRepeated:=0;
                 end
               else
                 WordCount.Add(temp, 1);
-              if (PrevNumbOfWordsRepeated<PrevPrevNumbOfWordsRepeated) and((NumbOfWordsRepeated-PrevNumbOfWordsRepeated)<2) then
-                begin
-                  sentenceOut[i-2]:= sentenceOut[i-2]+ #1013;
-                  Wordcount.free;
-                  WordCount := TDictionary<string, Integer>.Create;
-                end;
             end;
+
         end;
-
-
-
+      if (IndexOfNewPassageSentence>2 ) and(PrevNumbOfWordsRepeated<=PrevPrevNumbOfWordsRepeated) and((NumbOfWordsRepeated-PrevNumbOfWordsRepeated)<2) then
+        begin
+          sentenceOut[i-2]:= sentenceOut[i-2]+ #10;// #10- перевод строки
+          Wordcount.free;
+          IndexOfNewPassageSentence:=0;
+          WordCount := TDictionary<string, Integer>.Create;
+        end;
+      inc(IndexOfNewPassageSentence);
     end;
 end;
-var FirstSampleText:string;
+var FirstSampleText,SampleTextLine:string;
     Sentence:TMyArray;
     i:integer;
+    SampleText:textfile;
+
 begin
-FirstSampleText :='Катя пришла со школы. Катя 4 года. Катя крутая. Мама готовит суп. Мама устала.';
-SentenceSplit(FirstSampleText,Sentence);
-SplitTextIntoParagraphs(Sentence);
-for i:=low(Sentence) to high(Sentence) do
-  begin
-    write(sentence[i]);
-  end;
-
-
-
+  AssignFile(SampleText, '\\Mac\Home\Documents\Курсовая работа\Тексты для проверки\Тексты уровня А1\Моя семья.txt');
+  reset(SampleText);
+  while not(Eof(SampleText)) do
+    begin
+      readln(SampleText,SampleTextLine);
+      FirstSampleText:=FirstSampleText+SampleTextLine;
+    end;
+    FirstSampleText:= UTF8Decode(FirstSampleText);
+    CloseFile(SampleText);
+ // FirstSampleText :='У меня большая семья из шести человек: я, мама, папа, старшая сестра, бабушка и дедушка. Мы живем все вместе с собакой Бимом и кошкой Муркой в большом доме в деревне. Мой папа встает раньше всех, потому что ему рано на работу. Он работает доктором. Обычно бабушка готовит нам завтрак. Я обожаю овсяную кашу, а моя сестра Аня – блины. После завтрака мы собираемся и идем в школу. Моя сестра учится в пятом классе, а я – во втором. Мы любим учиться и играть с друзьями. Больше всего я люблю географию. Когда мы приходим домой из школы, мы смотрим телевизор, а потом ужинаем и делаем уроки. Иногда мы помогаем бабушке и маме в огороде, где они выращивают овощи и фрукты.';
+  SentenceSplit(FirstSampleText,Sentence);
+  SplitTextIntoParagraphs(Sentence);
+  for i:=low(Sentence) to high(Sentence) do
+    begin
+      write(sentence[i]);
+    end;
+  readln;
 end.
